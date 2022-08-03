@@ -52,13 +52,29 @@ func (db *ContactConnection) GetContacts() (*[]model.Contact, error) {
 }
 
 // InsertContact implements ContactRepository
-func (*ContactConnection) InsertContact(b model.Contact) (*model.Contact, error) {
-	panic("unimplemented")
+func (db *ContactConnection) InsertContact(b model.Contact) (*model.Contact, error) {
+	proses := db.connection.Debug().Save(&b)
+
+	if proses.Error != nil {
+		fmt.Println("ada error di proses", proses)
+		return nil, proses.Error
+	}
+
+	db.connection.Find(&b)
+	return &b, nil
 }
 
 // UpdateContact implements ContactRepository
-func (*ContactConnection) UpdateContact(b model.Contact) (*model.Contact, error) {
-	panic("unimplemented")
+func (db *ContactConnection) UpdateContact(b model.Contact) (*model.Contact, error) {
+	proses := db.connection.Debug().Updates(&b)
+
+	if proses.Error != nil {
+		fmt.Println("ada error di proses", proses)
+		return nil, proses.Error
+	}
+
+	db.connection.Find(&b)
+	return &b, nil
 }
 
 func NewContactRepository(dbConn *gorm.DB) ContactRepository {

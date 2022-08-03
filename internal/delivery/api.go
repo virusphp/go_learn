@@ -65,6 +65,7 @@ func InitializeRoutes() {
 		controller controller.ContactController = controller.NewContactController(repo)
 	)
 	r.GET("/api/contact/all", controller.All)
+	r.POST("/api/contact/insert", controller.Insert)
 	r.Run(":" + port)
 
 }

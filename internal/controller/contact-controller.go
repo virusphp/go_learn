@@ -3,6 +3,8 @@ package controller
 import (
 	"go_learn/internal/repository"
 
+	"go_learn/internal/model"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,8 +40,18 @@ func (*contactController) FindByID(context *gin.Context) {
 }
 
 // Insert implements ContactController
-func (*contactController) Insert(context *gin.Context) {
-	panic("unimplemented")
+func (c *contactController) Insert(context *gin.Context) {
+	var input model.Contact
+	// nama := context.Param("nama")
+	// alamat := context.Param("alamat")
+	// no_telp := context.Param("no_telp")
+
+	proses, error := c.ContactRepo.InsertContact(input)
+	if error != nil {
+		context.JSON(500, proses)
+	}
+	// fmt.Println(context.Params)
+	context.JSON(200, proses)
 }
 
 // Update implements ContactController
