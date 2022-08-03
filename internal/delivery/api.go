@@ -2,6 +2,8 @@ package delivery
 
 import (
 	"go_learn/config"
+	"go_learn/internal/controller"
+	"go_learn/internal/repository"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -58,6 +60,11 @@ func InitializeRoutes() {
 
 	// antrol.WsBpjsAntrolRoutes(r, db, jwtService)
 	port := os.Getenv("APP_PORT")
+	var (
+		repo       repository.ContactRepository = repository.NewContactRepository(db)
+		controller controller.ContactController = controller.NewContactController(repo)
+	)
+	r.GET("/api/contact/all", controller.All)
 	r.Run(":" + port)
 
 }
