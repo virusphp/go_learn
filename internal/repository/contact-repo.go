@@ -12,7 +12,7 @@ type ContactRepository interface {
 	InsertContact(b model.Contact) (*model.Contact, error)
 	UpdateContact(b model.Contact) (*model.Contact, error)
 	DeleteContact(b model.Contact) error
-	FindContactByID(ContactID uint64) (*model.Contact, error)
+	FindContactByID(ContactID uint) (*model.Contact, error)
 }
 
 type ContactConnection struct {
@@ -33,8 +33,16 @@ func (db *ContactConnection) DeleteContact(b model.Contact) error {
 }
 
 // FindContactByID implements ContactRepository
-func (*ContactConnection) FindContactByID(ContactID uint64) (*model.Contact, error) {
-	panic("unimplemented")
+func (db *ContactConnection) FindContactByID(ContactID uint) (*model.Contact, error) {
+	data := model.Contact{}
+	proses := db.connection.Debug().Where("id=?", ContactID).Find(&data)
+
+	if proses.Error != nil {
+		fmt.Println("ada pesan error", proses.Error.Error())
+		return nil, proses.Error
+	}
+	return &data, nil
+
 }
 
 // GetContact implements ContactRepository

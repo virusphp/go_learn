@@ -66,6 +66,9 @@ func InitializeRoutes() {
 	)
 	r.GET("/api/contact/all", controller.All)
 	r.POST("/api/contact/insert", controller.Insert)
+	r.PUT("/api/contact/update/:id", controller.Update)
+	r.DELETE("/api/contact/delete/:id", controller.Delete)
+	r.GET("/api/contact/find/:id", controller.FindByID)
 	r.Run(":" + port)
 
 }

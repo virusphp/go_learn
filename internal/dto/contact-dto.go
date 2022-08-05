@@ -1,7 +1,7 @@
 package dto
 
 type ContactDTO struct {
-	nama    string `json:"nama"`
-	alamat  string `json:"alamat"`
-	no_telp string `json:"no_telp"`
+	Name    string `json:"nama"`
+	Address string `json:"alamat"`
+	Phone   string `json:"no_telp"`
 }

@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"fmt"
 	"go_learn/internal/repository"
+	"strconv"
 
 	"go_learn/internal/model"
 
@@ -30,33 +32,96 @@ func (c *contactController) All(context *gin.Context) {
 }
 
 // Delete implements ContactController
-func (*contactController) Delete(context *gin.Context) {
-	panic("unimplemented")
+func (c *contactController) Delete(context *gin.Context) {
+	id := context.Param("id")
+
+	convertedId, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println("error kampret := ", err)
+		context.JSON(500, err)
+		return
+	}
+	input := model.Contact{}
+
+	input.ID = uint(convertedId)
+
+	error := c.ContactRepo.DeleteContact(input)
+	if error != nil {
+		context.JSON(500, error)
+		return
+	}
+
+	context.String(200, "SUKSES HAPUS!")
+
 }
 
 // FindByID implements ContactController
-func (*contactController) FindByID(context *gin.Context) {
-	panic("unimplemented")
+func (c *contactController) FindByID(context *gin.Context) {
+	id := context.Param("id")
+	//convert id from string to int
+	convertedId, err := strconv.Atoi(id)
+
+	if err != nil {
+		context.JSON(404, err)
+		return
+	}
+
+	proses, error := c.ContactRepo.FindContactByID(uint(convertedId))
+
+	if error != nil {
+		context.JSON(500, error)
+		return
+	}
+
+	context.JSON(200, proses)
+
 }
 
 // Insert implements ContactController
 func (c *contactController) Insert(context *gin.Context) {
 	var input model.Contact
-	// nama := context.Param("nama")
-	// alamat := context.Param("alamat")
-	// no_telp := context.Param("no_telp")
+
+	err := context.ShouldBind(&input)
+	if err != nil {
+		fmt.Println("error kamvrett := ", err)
+	}
 
 	proses, error := c.ContactRepo.InsertContact(input)
 	if error != nil {
 		context.JSON(500, proses)
 	}
-	// fmt.Println(context.Params)
+
 	context.JSON(200, proses)
 }
 
 // Update implements ContactController
-func (*contactController) Update(context *gin.Context) {
-	panic("unimplemented")
+func (c *contactController) Update(context *gin.Context) {
+	id := context.Param("id")
+
+	convertedId, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println("error kampret := ", err)
+		context.JSON(500, err)
+		return
+	}
+	input := model.Contact{}
+
+	err = context.ShouldBind(&input)
+
+	if err != nil {
+		fmt.Println("error kampret := ", err)
+		context.JSON(500, err)
+		return
+	}
+	input.ID = uint(convertedId)
+	proses, error := c.ContactRepo.UpdateContact(input)
+	if error != nil {
+		context.JSON(500, proses)
+		return
+	}
+
+	context.JSON(200, proses)
+
 }
 
 func NewContactController(ContactRepo repository.ContactRepository) ContactController {
