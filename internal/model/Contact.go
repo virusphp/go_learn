@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type Contact struct {
 	gorm.Model
-	Name    string `gorm:"column:name;type:varchar(191)" json:"nama"`
-	Address string `gorm:"column:alamat;type:varchar(191)"  json:"alamat"`
-	Phone   string `gorm:"column:no_telp;type:varchar(191)"  json:"no_telp"`
+	Name    string `gorm:"column:name;type:varchar(191)" json:"name"`
+	Address string `gorm:"column:address;type:varchar(191)"  json:"address"`
+	Phone   string `gorm:"column:phone;type:varchar(191)"  json:"phone"`
 }
 
 func (Contact) TableName() string {

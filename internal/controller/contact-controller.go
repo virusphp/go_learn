@@ -92,16 +92,16 @@ func (c *contactController) Insert(context *gin.Context) {
 		return
 	}
 
-	fmt.Println("cek ", dtoContact)
-
 	err = smapping.FillStruct(&model, smapping.MapFields(&dtoContact))
 	if err != nil {
 		fmt.Println("Failed map : ", err)
+		return
 	}
 
 	proses, error := c.ContactRepo.InsertContact(model)
 	if error != nil {
 		context.JSON(500, proses)
+		return
 	}
 
 	context.JSON(200, proses)
@@ -117,24 +117,31 @@ func (c *contactController) Update(context *gin.Context) {
 		context.JSON(500, err)
 		return
 	}
-	input := model.Contact{}
+	var dtoContact dto.ContactDTO
 
-	err = context.ShouldBind(&input)
-
+	err = context.ShouldBind(&dtoContact)
 	if err != nil {
-		fmt.Println("error kampret := ", err)
+		fmt.Println("error kamvrett := ", err)
+		context.JSON(500, err.Error())
+		return
+	}
+
+	model := model.Contact{}
+	err = smapping.FillStruct(&model, smapping.MapFields(&dtoContact))
+	if err != nil {
+		fmt.Println("Failed map : ", err)
 		context.JSON(500, err)
 		return
 	}
-	input.ID = uint(convertedId)
-	proses, error := c.ContactRepo.UpdateContact(input)
+
+	model.ID = uint(convertedId)
+	proses, error := c.ContactRepo.UpdateContact(model)
 	if error != nil {
 		context.JSON(500, proses)
 		return
 	}
 
 	context.JSON(200, proses)
-
 }
 
 func NewContactController(ContactRepo repository.ContactRepository) ContactController {
