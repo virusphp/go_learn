@@ -2,10 +2,13 @@ package controller
 
 import (
 	"fmt"
+	"go_learn/internal/dto"
 	"go_learn/internal/repository"
 	"strconv"
 
 	"go_learn/internal/model"
+
+	"github.com/mashingan/smapping"
 
 	"github.com/gin-gonic/gin"
 )
@@ -79,14 +82,24 @@ func (c *contactController) FindByID(context *gin.Context) {
 
 // Insert implements ContactController
 func (c *contactController) Insert(context *gin.Context) {
-	var input model.Contact
+	var dtoContact dto.ContactDTO
+	var model model.Contact
 
-	err := context.ShouldBind(&input)
+	err := context.ShouldBind(&dtoContact)
 	if err != nil {
 		fmt.Println("error kamvrett := ", err)
+		context.JSON(500, err.Error())
+		return
 	}
 
-	proses, error := c.ContactRepo.InsertContact(input)
+	fmt.Println("cek ", dtoContact)
+
+	err = smapping.FillStruct(&model, smapping.MapFields(&dtoContact))
+	if err != nil {
+		fmt.Println("Failed map : ", err)
+	}
+
+	proses, error := c.ContactRepo.InsertContact(model)
 	if error != nil {
 		context.JSON(500, proses)
 	}
