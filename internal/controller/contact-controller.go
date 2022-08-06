@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"go_learn/internal/dto"
 	"go_learn/internal/repository"
+	"go_learn/pkg/responsebuilder"
+	"net/http"
 	"strconv"
 
 	"go_learn/internal/model"
@@ -29,9 +31,12 @@ type contactController struct {
 func (c *contactController) All(context *gin.Context) {
 	proses, error := c.ContactRepo.GetContacts()
 	if error != nil {
-		context.JSON(500, proses)
+		res := responsebuilder.BuildErrorResponse("ERROR!", error.Error(), nil)
+		context.JSON(http.StatusInternalServerError, res)
+		return
 	}
-	context.JSON(200, proses)
+	res := responsebuilder.BuildResponse(true, "OK", proses)
+	context.JSON(http.StatusOK, res)
 }
 
 // Delete implements ContactController
@@ -55,7 +60,6 @@ func (c *contactController) Delete(context *gin.Context) {
 	}
 
 	context.String(200, "SUKSES HAPUS!")
-
 }
 
 // FindByID implements ContactController
