@@ -29,13 +29,26 @@ type contactController struct {
 
 // All implements ContactController
 func (c *contactController) All(context *gin.Context) {
-	proses, error := c.ContactRepo.GetContacts()
-	if error != nil {
-		res := responsebuilder.BuildErrorResponse("ERROR!", error.Error(), nil)
+	var listcontactDTO dto.ListContactDTO
+	errDTO := context.ShouldBind(&listcontactDTO)
+	if errDTO != nil {
+		res := responsebuilder.BuildErrorResponse("ERROR!", errDTO.Error(), nil)
 		context.JSON(http.StatusInternalServerError, res)
 		return
 	}
-	res := responsebuilder.BuildResponse(true, "OK", proses)
+	result, count_, err := c.ContactRepo.FindContactByName(listcontactDTO.Search, listcontactDTO.Limit, listcontactDTO.Page, listcontactDTO.Order)
+	if err != nil {
+		res := responsebuilder.BuildErrorResponse("Something Error", "Fatal Error", responsebuilder.EmptyObj{})
+		context.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	if *count_ == 0 {
+		res := responsebuilder.BuildErrorResponse("Data not found", "No data with given id", responsebuilder.EmptyObj{})
+		context.JSON(http.StatusNotFound, res)
+		return
+	}
+	res := responsebuilder.BuildResponse_table(true, "OK", *count_, result)
 	context.JSON(http.StatusOK, res)
 }
 
@@ -91,8 +104,8 @@ func (c *contactController) Insert(context *gin.Context) {
 
 	err := context.ShouldBind(&dtoContact)
 	if err != nil {
-		fmt.Println("error kamvrett := ", err)
-		context.JSON(500, err.Error())
+		res := responsebuilder.BuildErrorResponse("ERROR!", err.Error(), nil)
+		context.JSON(500, res)
 		return
 	}
 
@@ -104,11 +117,13 @@ func (c *contactController) Insert(context *gin.Context) {
 
 	proses, error := c.ContactRepo.InsertContact(model)
 	if error != nil {
-		context.JSON(500, proses)
+		res := responsebuilder.BuildErrorResponse("ERROR!", err.Error(), nil)
+		context.JSON(500, res)
 		return
 	}
 
-	context.JSON(200, proses)
+	res := responsebuilder.BuildResponse(true, "OK", proses)
+	context.JSON(200, res)
 }
 
 // Update implements ContactController

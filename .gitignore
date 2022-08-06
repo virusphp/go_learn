@@ -1,2 +1,5 @@
 vendor/
 .env
+cmd/tmp/*
+tmp/*
+bin/*
