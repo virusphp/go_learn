@@ -1,6 +1,9 @@
 package responsebuilder
 
-import "strings"
+import (
+	"go_learn/internal/dto"
+	"strings"
+)
 
 //Response is used for static shape json return
 type Response struct {
@@ -51,6 +54,17 @@ func BuildErrorResponse(message string, err string, data interface{}) Response {
 		Message: message,
 		Errors:  splittedError,
 		Data:    data,
+	}
+	return res
+}
+
+func BuildResponseLogin(status bool, message string, token string, data interface{}) dto.Response_login {
+	res := dto.Response_login{
+		Status:  status,
+		Message: message,
+		Errors:  nil,
+		Data:    data,
+		Token:   token,
 	}
 	return res
 }

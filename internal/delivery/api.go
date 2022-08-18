@@ -4,6 +4,7 @@ import (
 	"go_learn/config"
 	"go_learn/internal/controller"
 	"go_learn/internal/repository"
+	"go_learn/internal/service"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -61,15 +62,22 @@ func InitializeRoutes() {
 	// antrol.WsBpjsAntrolRoutes(r, db, jwtService)
 	port := os.Getenv("APP_PORT")
 	var (
-		repo       repository.ContactRepository = repository.NewContactRepository(db)
-		controller controller.ContactController = controller.NewContactController(repo)
+		jwtService        service.JWTService           = service.NewJWTService()
+		repo              repository.ContactRepository = repository.NewContactRepository(db)
+		repoUser          repository.UserRepository    = repository.NewUserRepository(db)
+		controllerContact controller.ContactController = controller.NewContactController(repo)
+		controllerUser    controller.UserController    = controller.NewUserController(repoUser)
+		controllerAuth    controller.AuthController    = controller.NewAuthController(repoUser, jwtService)
 	)
 	// r.GET("/api/contact/all", controller.All)
-	r.POST("/api/contact/all", controller.All)
-	r.POST("/api/contact/insert", controller.Insert)
-	r.PUT("/api/contact/update/:id", controller.Update)
-	r.DELETE("/api/contact/delete/:id", controller.Delete)
-	r.GET("/api/contact/find/:id", controller.FindByID)
+	r.POST("/api/contact/all", controllerContact.All)
+	r.POST("/api/contact/insert", controllerContact.Insert)
+	r.PUT("/api/contact/update/:id", controllerContact.Update)
+	r.DELETE("/api/contact/delete/:id", controllerContact.Delete)
+	r.GET("/api/contact/find/:id", controllerContact.FindByID)
+
+	r.POST("/api/user/insert", controllerUser.Insert)
+	r.POST("/api/auth/login", controllerAuth.Login)
 	r.Run(":" + port)
 
 }

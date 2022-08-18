@@ -59,7 +59,8 @@ func (server *Server) SetupDatabaseConnection() *gorm.DB {
 
 func (server *Server) initMigrate() {
 	server.DB.Migrator().AutoMigrate(
-		&model.Contact{},
+		// &model.Contact{},
+		&model.User{},
 	// &master.DaftarTindakanM{},``
 	// foreign dari daftar tindakan
 	// &master.JenisKegiatanM{},

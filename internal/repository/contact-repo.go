@@ -58,35 +58,30 @@ func (db *ContactConnection) GetContacts() (*[]model.Contact, error) {
 	}
 
 	return &data, nil
-
 }
 
-func (db *ContactConnection) FindContactByName(KomponenTarifName *string, Limit string, Page string, Order string) (*[]model.Contact, *int64, error) {
-	limits, _ := strconv.Atoi(Limit)
-	pages, _ := strconv.Atoi(Page)
-	// Sort := "id asc"
+func (db *ContactConnection) FindContactByName(search *string, limit string, page string, order string) (*[]model.Contact, *int64, error) {
+	limits, _ := strconv.Atoi(limit)
+	pages, _ := strconv.Atoi(page)
 	var count_ int64
 	offset := (pages - 1) * limits
-	var komponen_tarifs []model.Contact
-	// var x []KomponenTarifM_try
-	// queryBuider := db.connection.Limit(limits).Offset(offset).Order(Order)
+	var contacts []model.Contact
 	queryBuider := db.connection.Model(&model.Contact{})
-	// result := queryBuider.Model(&models.User{}).Where(user).Find(&users)
-	if KomponenTarifName != nil {
-		queryBuider = queryBuider.Debug().Where("komponen_tarif_nama LIKE ? AND ", "%"+*KomponenTarifName+"%")
+	if search != nil {
+		queryBuider = queryBuider.Debug().Where("name LIKE ? ", "%"+*search+"%")
 	}
 	prosesCount := queryBuider.Debug().Count(&count_)
 	if prosesCount.Error != nil {
 		fmt.Println("ada error di proses count", prosesCount.Error)
-		return &komponen_tarifs, &count_, prosesCount.Error
+		return &contacts, &count_, prosesCount.Error
 	}
-	proses := queryBuider.Debug().Limit(limits).Offset(offset).Order(Order).Find(&komponen_tarifs)
+	proses := queryBuider.Debug().Limit(limits).Offset(offset).Order(order).Find(&contacts)
 	if proses.Error != nil {
 		fmt.Println("ada error di proses", proses.Error)
-		return &komponen_tarifs, &count_, proses.Error
+		return &contacts, &count_, proses.Error
 	}
 
-	return &komponen_tarifs, &count_, nil
+	return &contacts, &count_, nil
 }
 
 // InsertContact implements ContactRepository
