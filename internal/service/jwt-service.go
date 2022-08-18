@@ -31,7 +31,7 @@ type jwtService struct {
 //NewJWTService method is creates a new instance of JWTService
 func NewJWTService() JWTService {
 	return &jwtService{
-		issuer:    "megono909090",
+		issuer:    "_megono",
 		secretKey: getSecretKey(),
 	}
 }
@@ -39,7 +39,7 @@ func NewJWTService() JWTService {
 func getSecretKey() string {
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey != "" {
-		secretKey = "megono909090"
+		secretKey = "_megono"
 	}
 	return secretKey
 }
@@ -67,6 +67,7 @@ func (j *jwtService) GenerateToken(UserID string, Name string, Otoritas string, 
 
 func (j *jwtService) ValidateToken(token_catch string) (*jwt.Token, error) {
 	token := ExtractTokenMidleware(token_catch)
+	// println(token)
 	return jwt.Parse(token, func(t_ *jwt.Token) (interface{}, error) {
 		if _, ok := t_.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method %v", t_.Header["alg"])

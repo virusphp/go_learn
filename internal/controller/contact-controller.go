@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"go_learn/internal/dto"
 	"go_learn/internal/repository"
+	"go_learn/internal/service"
 	"go_learn/pkg/responsebuilder"
 	"net/http"
 	"strconv"
 
 	"go_learn/internal/model"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/mashingan/smapping"
 
 	"github.com/gin-gonic/gin"
@@ -25,6 +27,7 @@ type ContactController interface {
 
 type contactController struct {
 	ContactRepo repository.ContactRepository
+	jwtService  service.JWTService
 }
 
 // All implements ContactController
@@ -107,13 +110,39 @@ func (c *contactController) Insert(context *gin.Context) {
 		res := responsebuilder.BuildErrorResponse("ERROR!", err.Error(), nil)
 		context.JSON(500, res)
 		return
+	} else {
+		authHeader := context.GetHeader("Authorization")
+		aToken, err := c.jwtService.ValidateToken(authHeader)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		claims := aToken.Claims.(jwt.MapClaims)
+		id := fmt.Sprintf("%v", claims["user_id"])
+		// fmt.Println(claims, id)
+		convertedUserID, err := strconv.ParseUint(id, 10, 64)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		dtoContact.UserID = uint32(convertedUserID)
+
+		err = smapping.FillStruct(&model, smapping.MapFields(&dtoContact))
+		if err != nil {
+			fmt.Println("Failed map : ", err)
+			return
+		}
+		result, error := c.ContactRepo.InsertContact(model)
+		if error != nil {
+			response := responsebuilder.BuildErrorResponse("Maaf Error tak beraturan", error.Error(), nil)
+			context.JSON(500, response)
+			return
+		}
+
+		response := responsebuilder.BuildResponse(true, "OK", result)
+		context.JSON(http.StatusCreated, response)
 	}
 
 	err = smapping.FillStruct(&model, smapping.MapFields(&dtoContact))
-	if err != nil {
-		fmt.Println("Failed map : ", err)
-		return
-	}
 
 	proses, error := c.ContactRepo.InsertContact(model)
 	if error != nil {

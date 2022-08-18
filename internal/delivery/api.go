@@ -5,6 +5,7 @@ import (
 	"go_learn/internal/controller"
 	"go_learn/internal/repository"
 	"go_learn/internal/service"
+	"go_learn/middleware"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, _megono")
 		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
@@ -70,11 +71,15 @@ func InitializeRoutes() {
 		controllerAuth    controller.AuthController    = controller.NewAuthController(repoUser, jwtService)
 	)
 	// r.GET("/api/contact/all", controller.All)
-	r.POST("/api/contact/all", controllerContact.All)
-	r.POST("/api/contact/insert", controllerContact.Insert)
-	r.PUT("/api/contact/update/:id", controllerContact.Update)
-	r.DELETE("/api/contact/delete/:id", controllerContact.Delete)
-	r.GET("/api/contact/find/:id", controllerContact.FindByID)
+
+	contact := r.Group("/api/contact", middleware.AuthorizeJWT(jwtService))
+	{
+		contact.POST("/all", controllerContact.All)
+		contact.POST("/insert", controllerContact.Insert)
+		contact.PUT("/update/:id", controllerContact.Update)
+		contact.DELETE("/delete/:id", controllerContact.Delete)
+		contact.GET("/find/:id", controllerContact.FindByID)
+	}
 
 	r.POST("/api/user/insert", controllerUser.Insert)
 	r.POST("/api/auth/login", controllerAuth.Login)
